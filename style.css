@@ -1,0 +1,5 @@
+body { font-family: sans-serif; padding: 2rem; }
+.main { max-width: 600px; margin: auto; display: flex; flex-direction: column; gap: 1rem; }
+label, input, select { display: block; margin-top: 1rem; }
+.results { margin-top: 2rem; }
+.result { padding: 0.8rem; border: 1px solid #ccc; border-radius: 6px; margin-bottom: 1rem; }
