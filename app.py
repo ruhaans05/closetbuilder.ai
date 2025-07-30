@@ -12,13 +12,13 @@ openai.api_key = st.secrets.get("OPENAI_API_KEY", "")
 shirt_sizes = ["", "XS", "S", "M", "L", "XL"]
 genders = ["", "Male", "Female", "Unisex", "Kids"]
 channels = ["", "Online", "In Person", "Both"]
-countries = sorted([
-    "Afghanistan", "Albania", "Algeria", "Argentina", "Australia", "Austria", "Bangladesh", "Belgium", "Brazil", "Canada",
+countries = [
+    "United States of America", "United Kingdom", "Canada", "United Arab Emirates", "Afghanistan", "Albania", "Algeria", "Argentina", "Australia", "Austria", "Bangladesh", "Belgium", "Brazil", "Canada",
     "China", "Colombia", "Denmark", "Egypt", "Finland", "France", "Germany", "Greece", "Hungary", "India", "Indonesia", "Iran",
     "Iraq", "Ireland", "Israel", "Italy", "Japan", "Kenya", "Malaysia", "Mexico", "Nepal", "Netherlands", "New Zealand", "Nigeria",
     "Norway", "Pakistan", "Philippines", "Poland", "Portugal", "Qatar", "Russia", "Saudi Arabia", "Singapore", "South Africa",
     "South Korea", "Spain", "Sri Lanka", "Sweden", "Switzerland", "Thailand", "Turkey", "UAE", "UK", "USA", "Vietnam", "Zimbabwe"
-])
+]
 
 # --- Currency Setup ---
 currency_options = {
