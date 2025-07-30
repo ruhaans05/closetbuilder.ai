@@ -90,17 +90,19 @@ export default function App() {
 
       <div>
         <label>Country:</label>
-        <input
-          type="text"
-          list="countries"
-          placeholder="Start typing..."
+        <select
           value={formData.country}
           onChange={e => setFormData({ ...formData, country: e.target.value })}
-        />
-        <datalist id="countries">
-          {countries.map((c) => <option key={c} value={c} />)}
-        </datalist>
+        >
+          <option value="">Select your country</option>
+          {countries.map(c => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
+        </select>
       </div>
+
 
       <div>
         <label>Price Range:</label>
