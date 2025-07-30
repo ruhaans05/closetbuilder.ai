@@ -55,8 +55,8 @@ If fewer than 20 are found, fill in the rest with similar items. Return as JSON:
   } catch (err) {
     console.error("OpenAI error:", err.message);
     res.status(500).json({
-      error: "Failed to generate results",
-      detail: err.message,
+      error: "Failed to generate results from OpenAI",
+      message: err.message || "Unknown error"
     });
   }
 };
