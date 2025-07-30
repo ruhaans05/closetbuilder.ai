@@ -29,7 +29,7 @@ currency_options = {
 }
 
 # --- Streamlit UI ---
-st.title("🧠 AI Clothing Finder")
+st.title("🎩  AI Clothing Finder")
 
 # Real-time currency config
 currency = st.selectbox("Currency", list(currency_options.keys()), index=0)
@@ -60,7 +60,7 @@ with st.form("search_form"):
 
 # --- Submit to OpenAI ---
 if submitted:
-    with st.spinner("Thinking..."):
+    with st.spinner("Designing your wardrobe..."):
         prompt = f"""
 You're a fashion shopping assistant. Based on this user's preferences:
 
@@ -106,7 +106,7 @@ Return the result as strict valid JSON like:
                 try:
                     results = ast.literal_eval(raw)
                 except Exception:
-                    st.error("❌ Failed to parse AI response.")
+                    st.error("❌ ClosetBuilder.AI is down right now. There are developers working on this behind the scenes. Please come back later.")
                     st.code(raw)
                     st.stop()
 
