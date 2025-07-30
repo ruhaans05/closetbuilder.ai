@@ -1,10 +1,12 @@
-import { OpenAI } from "openai";
+const { Configuration, OpenAIApi } = require("openai");
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
+const configuration = new Configuration({
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
-export default async function handler(req, res) {
+const openai = new OpenAIApi(configuration);
+
+module.exports = async (req, res) => {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
@@ -33,22 +35,28 @@ If fewer than 20 are found, fill in the rest with similar items. Return as JSON:
 `;
 
   try {
-    const completion = await openai.chat.completions.create({
+    const completion = await openai.createChatCompletion({
       model: "gpt-4",
       messages: [{ role: "user", content: prompt }],
-      temperature: 0.7
+      temperature: 0.7,
     });
 
-    const raw = completion.choices[0].message.content;
+    const responseText = completion.data.choices[0].message.content;
 
-    // try to safely parse LLM output
-    const results = JSON.parse(raw);
+    let results;
+    try {
+      results = JSON.parse(responseText);
+    } catch (e) {
+      console.error("Fallback to eval due to JSON.parse error");
+      results = eval(responseText); // fallback
+    }
+
     res.status(200).json({ results });
   } catch (err) {
-    console.error("OpenAI error:", err);
+    console.error("OpenAI error:", err.message);
     res.status(500).json({
       error: "Failed to generate results",
-      detail: err.message
+      detail: err.message,
     });
   }
-}
+};
