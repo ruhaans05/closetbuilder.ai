@@ -3,42 +3,56 @@ import openai
 import json
 import ast
 
-# --- CONFIG ---
-openai.api_key = st.secrets.get("OPENAI_API_KEY", "")  # or hardcode: "sk-..."
+# --- OpenAI Key ---
+openai.api_key = st.secrets.get("OPENAI_API_KEY", "")  # or hardcode here
 
+# --- Dropdown Options ---
 shirt_sizes = ["", "XS", "S", "M", "L", "XL"]
 genders = ["", "Male", "Female", "Unisex", "Kids"]
 channels = ["", "Online", "In Person", "Both"]
-
 countries = sorted([
-    "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Argentina", "Australia", "Austria", "Bangladesh", "Belgium", "Brazil", "Canada",
+    "Afghanistan", "Albania", "Algeria", "Argentina", "Australia", "Austria", "Bangladesh", "Belgium", "Brazil", "Canada",
     "China", "Colombia", "Denmark", "Egypt", "Finland", "France", "Germany", "Greece", "Hungary", "India", "Indonesia", "Iran",
     "Iraq", "Ireland", "Israel", "Italy", "Japan", "Kenya", "Malaysia", "Mexico", "Nepal", "Netherlands", "New Zealand", "Nigeria",
     "Norway", "Pakistan", "Philippines", "Poland", "Portugal", "Qatar", "Russia", "Saudi Arabia", "Singapore", "South Africa",
-    "South Korea", "Spain", "Sri Lanka", "Sweden", "Switzerland", "Thailand", "Turkey", "UAE", "UK", "USA", "Vietnam", "Zimbabwe"
+    "South Korea", "Spain", "Sri Lanka", "Sweden", "Switzerland", "Thailand", "Turkey", "United Arab Emirates", "United Kingdom", "United States of America", "Vietnam", "Zimbabwe"
 ])
 
-# --- UI ---
+# --- Currency Exchange Rates (relative to EUR) ---
+currency_options = {
+    "EUR": {"symbol": "€", "rate": 1.0},
+    "CAD": {"symbol": "C$", "rate": 1.47},
+    "AUD": {"symbol": "A$", "rate": 1.63},
+    "GBP": {"symbol": "£", "rate": 0.85},
+    "INR": {"symbol": "₹", "rate": 90.0}
+}
+
+# --- Streamlit App UI ---
 st.title("🧠 AI Clothing Finder")
 
 with st.form("search_form"):
+    currency = st.selectbox("Currency", list(currency_options.keys()))
+    symbol = currency_options[currency]["symbol"]
+    rate = currency_options[currency]["rate"]
+    max_local_price = int(2000 * rate)
+
     col1, col2 = st.columns(2)
 
     with col1:
         shirt_size = st.selectbox("Shirt Size", shirt_sizes)
         gender = st.selectbox("Gender", genders)
-        min_price = st.slider("Min Price ($)", 0, 5000, 0, step=10)
+        min_price = st.slider(f"Min Price ({symbol})", 0, max_local_price, 0, step=10)
 
     with col2:
         channel = st.selectbox("Shopping Preference", channels)
         country = st.selectbox("Country", countries)
-        max_price = st.slider("Max Price ($)", 0, 5000, 5000, step=10)
+        max_price = st.slider(f"Max Price ({symbol})", 0, max_local_price, max_local_price, step=10)
 
     query = st.text_input("What are you looking for?", placeholder="e.g. black hoodie")
 
     submitted = st.form_submit_button("🔍 Find Clothes")
 
-# --- BACKEND ---
+# --- Submit to OpenAI ---
 if submitted:
     with st.spinner("Thinking..."):
         prompt = f"""
@@ -48,35 +62,44 @@ You're a fashion shopping assistant. Based on this user's preferences:
 - Gender: {gender}
 - Country: {country}
 - Shopping Preference: {channel}
-- Price Range: ${min_price} to ${max_price}
+- Currency: {currency}
+- Price Range: {symbol}{min_price} to {symbol}{max_price}
 - Query: {query}
 
-Find 20 clothing items available online that match these filters.
-Each item must include:
+Find 20 real clothing items available online that match these filters.
+Each result must include:
 - name
 - size
-- price
+- price (in {currency})
 - link (real product link)
 
-If fewer than 20 are found, fill in the rest with similar items. Return as JSON:
-[{{"name": "...", "size": "...", "price": ..., "link": "..."}}...]
+Return the result as strict valid JSON like:
+[
+  {{
+    "name": "...",
+    "size": "...",
+    "price": ...,
+    "link": "..."
+  }},
+  ...
+]
 """
 
         try:
-            res = openai.ChatCompletion.create(
+            response = openai.ChatCompletion.create(
                 model="gpt-4",
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.7
             )
-            raw = res.choices[0].message.content
 
-            # --- Robust parsing ---
+            raw = response.choices[0].message.content
+
             try:
                 results = json.loads(raw)
             except json.JSONDecodeError:
                 try:
                     results = ast.literal_eval(raw)
-                except Exception as e:
+                except Exception:
                     st.error("❌ Failed to parse AI response.")
                     st.code(raw)
                     st.stop()
@@ -85,7 +108,7 @@ If fewer than 20 are found, fill in the rest with similar items. Return as JSON:
 
             for item in results:
                 st.markdown(
-                    f"**[{item['name']}]({item['link']})**  \nSize: {item['size']} — ${item['price']}",
+                    f"**[{item['name']}]({item['link']})**  \nSize: {item['size']} — {symbol}{item['price']}",
                     unsafe_allow_html=True
                 )
 
