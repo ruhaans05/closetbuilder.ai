@@ -1,9 +1,10 @@
 import streamlit as st
 import openai
 import json
+import ast
 
-# --- SETUP ---
-openai.api_key = st.secrets.get("OPENAI_API_KEY", "")  # or hardcode it
+# --- CONFIG ---
+openai.api_key = st.secrets.get("OPENAI_API_KEY", "")  # or hardcode: "sk-..."
 
 shirt_sizes = ["", "XS", "S", "M", "L", "XL"]
 genders = ["", "Male", "Female", "Unisex", "Kids"]
@@ -27,6 +28,7 @@ with st.form("search_form"):
         shirt_size = st.selectbox("Shirt Size", shirt_sizes)
         gender = st.selectbox("Gender", genders)
         min_price = st.slider("Min Price ($)", 0, 5000, 0, step=10)
+
     with col2:
         channel = st.selectbox("Shopping Preference", channels)
         country = st.selectbox("Country", countries)
@@ -68,14 +70,24 @@ If fewer than 20 are found, fill in the rest with similar items. Return as JSON:
             )
             raw = res.choices[0].message.content
 
+            # --- Robust parsing ---
             try:
                 results = json.loads(raw)
-            except:
-                results = eval(raw)
+            except json.JSONDecodeError:
+                try:
+                    results = ast.literal_eval(raw)
+                except Exception as e:
+                    st.error("❌ Failed to parse AI response.")
+                    st.code(raw)
+                    st.stop()
 
-            st.success("Results found!")
+            st.success("✅ Found results!")
+
             for item in results:
-                st.markdown(f"**[{item['name']}]({item['link']})**  \nSize: {item['size']} — ${item['price']}", unsafe_allow_html=True)
+                st.markdown(
+                    f"**[{item['name']}]({item['link']})**  \nSize: {item['size']} — ${item['price']}",
+                    unsafe_allow_html=True
+                )
 
         except Exception as e:
             st.error(f"❌ Something went wrong: {str(e)}")
