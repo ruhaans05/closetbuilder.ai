@@ -52,9 +52,9 @@ export default function App() {
         setError("AI responded with no results.");
       }
     } catch (err) {
-      console.error("Search error:", err.response?.data || err.message);
       const msg = err.response?.data?.message || "Something went wrong with the AI request.";
       setError(msg);
+      console.error("Search error:", err.response?.data || err.message);
     }
 
     setLoading(false);
@@ -91,13 +91,14 @@ export default function App() {
       <div>
         <label>Country:</label>
         <input
+          type="text"
           list="countries"
+          placeholder="Start typing..."
           value={formData.country}
           onChange={e => setFormData({ ...formData, country: e.target.value })}
-          placeholder="Type your country"
         />
         <datalist id="countries">
-          {countries.map(c => <option key={c} value={c} />)}
+          {countries.map((c) => <option key={c} value={c} />)}
         </datalist>
       </div>
 
@@ -126,8 +127,8 @@ export default function App() {
         <input
           type="text"
           value={formData.query}
+          placeholder="e.g. black hoodie, soccer jersey"
           onChange={e => setFormData({ ...formData, query: e.target.value })}
-          placeholder="e.g. black dress, soccer jersey"
         />
       </div>
 
