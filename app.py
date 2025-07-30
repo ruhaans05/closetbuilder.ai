@@ -4,7 +4,7 @@ import json
 import ast
 
 # --- OpenAI Key ---
-openai.api_key = st.secrets.get("OPENAI_API_KEY", "")  # Replace with key if not using st.secrets
+openai.api_key = st.secrets.get("OPENAI_API_KEY", "")  # Replace with your key during local dev
 
 # --- Dropdown Options ---
 shirt_sizes = ["", "XS", "S", "M", "L", "XL"]
@@ -18,7 +18,7 @@ countries = sorted([
     "South Korea", "Spain", "Sri Lanka", "Sweden", "Switzerland", "Thailand", "Turkey", "UAE", "UK", "USA", "Vietnam", "Zimbabwe"
 ])
 
-# --- Currency Exchange Rates (relative to EUR) ---
+# --- Currency Setup ---
 currency_options = {
     "USD": {"symbol": "$", "rate": 1.1},
     "EUR": {"symbol": "€", "rate": 1.0},
@@ -28,30 +28,31 @@ currency_options = {
     "INR": {"symbol": "₹", "rate": 90.0}
 }
 
-# --- Streamlit App UI ---
+# --- Streamlit UI ---
 st.title("🧠 AI Clothing Finder")
 
+# Real-time currency config
+currency = st.selectbox("Currency", list(currency_options.keys()), index=0)
+symbol = currency_options[currency]["symbol"]
+rate = currency_options[currency]["rate"]
+max_local_price = int(2000 * rate)
+
+# Price sliders
+col3, col4 = st.columns(2)
+with col3:
+    min_price = st.slider(f"Min Price ({symbol})", 0, max_local_price, 0, step=10)
+with col4:
+    max_price = st.slider(f"Max Price ({symbol})", 0, max_local_price, max_local_price, step=10)
+
+# Form inputs (submitted together)
 with st.form("search_form"):
     col1, col2 = st.columns(2)
-
     with col1:
         shirt_size = st.selectbox("Shirt Size", shirt_sizes)
         gender = st.selectbox("Gender", genders)
-
     with col2:
         channel = st.selectbox("Shopping Preference", channels)
         country = st.selectbox("Country", countries)
-
-    currency = st.selectbox("Currency", list(currency_options.keys()), index=0)
-    symbol = currency_options[currency]["symbol"]
-    rate = currency_options[currency]["rate"]
-    max_local_price = int(2000 * rate)
-
-    col3, col4 = st.columns(2)
-    with col3:
-        min_price = st.slider(f"Min Price ({symbol})", 0, max_local_price, 0, step=10)
-    with col4:
-        max_price = st.slider(f"Max Price ({symbol})", 0, max_local_price, max_local_price, step=10)
 
     query = st.text_input("What are you looking for?", placeholder="e.g. black hoodie")
 
