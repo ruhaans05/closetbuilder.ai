@@ -29,7 +29,7 @@ currency_options = {
 }
 
 # --- Streamlit UI ---
-st.title("🎩  AI Clothing Finder")
+st.title("🎩 ClosetBuilder.AI -- Design your wardrobe in seconds!")
 
 # Real-time currency config
 currency = st.selectbox("Currency", list(currency_options.keys()), index=0)
