@@ -124,7 +124,9 @@ st.title("🎩 ClosetBuilder.AI — Design your wardrobe in seconds!")
 currency = st.selectbox("Currency", list(currency_options.keys()), index=0)
 symbol = currency_options[currency]["symbol"]
 rate = currency_options[currency]["rate"]
-max_local_price = int(2000 * rate)
+usd_max_price = 1000
+max_local_price = int(usd_max_price * rate)
+
 
 # --- Price sliders ---
 col3, col4 = st.columns(2)
